@@ -1,10 +1,10 @@
 use anyhow::{Context, Result};
-use std::collections::HashMap;
 use std::process::Stdio;
 use tokio::io::{AsyncBufReadExt, BufReader};
 
 use crate::cli::RunArgs;
-use crate::config::{project::ProjectConfig, resolver, secrets};
+use crate::config::{project::ProjectConfig, secrets};
+use crate::inject;
 use crate::mask::LogMasker;
 
 pub async fn execute(args: RunArgs) -> Result<()> {
@@ -12,27 +12,9 @@ pub async fn execute(args: RunArgs) -> Result<()> {
     let config = ProjectConfig::load()?;
     let store = secrets::load()?;
 
-    // ── 2. Resolve env vars for the active profile ──────────────────────────
-    let profile_env = config.env.get(&args.profile).cloned().unwrap_or_default();
-    let mut resolved_env: HashMap<String, String> = HashMap::new();
-    for (key, raw_value) in &profile_env {
-        let value = resolver::resolve_value(raw_value, &store)
-            .with_context(|| format!("Failed to resolve env var '{}'", key))?;
-        resolved_env.insert(key.clone(), value);
-    }
-
-    // ── 3. Collect all secret values for log masking ────────────────────────
-    let mut secret_values: Vec<String> = resolved_env.values().cloned().collect();
-
-    // Also resolve and collect proxy header values
-    for route in &config.proxy.routes {
-        for raw_header in route.inject_headers.values() {
-            if let Ok(v) = resolver::expand_template(raw_header, &store) {
-                secret_values.push(v);
-            }
-        }
-    }
-
+    // ── 2. Resolve env vars and collect secret values for masking ───────────
+    let resolved_env = inject::resolve_env(&config, &store, &args.profile)?;
+    let secret_values = inject::collect_secrets(&resolved_env, &config.proxy.routes, &store);
     let masker = LogMasker::new(&secret_values)?;
 
     // ── 4. Start proxy (unless --no-proxy) ──────────────────────────────────

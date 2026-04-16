@@ -2,10 +2,36 @@
 name = "vs"
 version = "0.1.0"
 edition = "2021"
+description = "Protect API secrets during VibeCoding — env injection, local proxy, log masking"
+license = "MIT"
+repository = "https://github.com/jjjkkkjjj/vibesafer"
+keywords = ["secrets", "proxy", "devtools", "security"]
+categories = ["command-line-utilities", "development-tools"]
 
 [[bin]]
 name = "vs"
 path = "src/main.rs"
+
+[lib]
+name = "vs"
+path = "src/lib.rs"
+
+# ── Distribution (cargo-dist) ──────────────────────────────────────────────
+[workspace.metadata.dist]
+cargo-dist-version = "0.28.0"
+ci = "github"
+installers = ["shell", "powershell"]
+targets = [
+  "x86_64-apple-darwin",
+  "aarch64-apple-darwin",
+  "x86_64-unknown-linux-gnu",
+  "x86_64-pc-windows-msvc",
+]
+pr-run-mode = "plan"
+
+[profile.dist]
+inherits = "release"
+lto = "thin"
 
 [dependencies]
 # CLI

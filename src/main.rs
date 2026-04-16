@@ -1,12 +1,7 @@
-mod cli;
-mod commands;
-mod config;
-mod mask;
-mod proxy;
-
 use anyhow::Result;
 use clap::Parser;
-use cli::{Cli, Commands};
+use vs::cli::{Cli, Commands};
+use vs::commands;
 
 #[tokio::main]
 async fn main() -> Result<()> {

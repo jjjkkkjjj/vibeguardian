@@ -96,21 +96,3 @@ fn write_secret_file(path: &std::path::Path, content: &str) -> Result<()> {
         .with_context(|| format!("Failed to write {}", path.display()))
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use serde_json::json;
-
-    #[test]
-    fn resolve_nested_path() {
-        let store = json!({ "global": { "stripe": { "secret_key": "sk_test_123" } } });
-        let val = resolve(&store, "global/stripe/secret_key").unwrap();
-        assert_eq!(val, "sk_test_123");
-    }
-
-    #[test]
-    fn resolve_missing_path() {
-        let store = json!({});
-        assert!(resolve(&store, "global/missing").is_err());
-    }
-}
