@@ -38,7 +38,7 @@ maintainer = "jjjkkkjjj <jjjkkkjjj@users.noreply.github.com>"
 section = "utils"
 depends = "$auto"
 assets = [
-  ["target/release/vs", "usr/local/bin/", "755"],
+  ["target/release/vg", "usr/local/bin/", "755"],
 ]
 
 [dependencies]
