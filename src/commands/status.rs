@@ -15,9 +15,11 @@ pub fn execute() -> Result<()> {
     for (profile, vars) in &config.env {
         println!("  [{}]", profile);
         for (key, raw) in vars {
-            // Show key names but mask any actual values
-            if raw.starts_with("secret://") {
-                println!("    {} = {} → ***[secret]***", key, raw);
+            // Show key names but mask any actual values; show scope label
+            if raw.starts_with("secret://project/") {
+                println!("    {} = {} → ***[secret:project]***", key, raw);
+            } else if raw.starts_with("secret://") {
+                println!("    {} = {} → ***[secret:global]***", key, raw);
             } else {
                 println!("    {} = {}", key, raw);
             }

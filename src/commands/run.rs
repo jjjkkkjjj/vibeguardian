@@ -3,23 +3,28 @@ use std::process::Stdio;
 use tokio::io::{AsyncBufReadExt, BufReader};
 
 use crate::cli::RunArgs;
-use crate::config::{project::ProjectConfig, secrets};
+use crate::config::{project::ProjectConfig, resolver::SecretStores, secrets};
 use crate::inject;
 use crate::mask::LogMasker;
 
 pub async fn execute(args: RunArgs) -> Result<()> {
     // ── 1. Load config and secrets ──────────────────────────────────────────
     let config = ProjectConfig::load()?;
-    let store = secrets::load()?;
+    let global = secrets::load()?;
+    let project = secrets::load_project(&config.project.name)?;
+    let stores = SecretStores {
+        global,
+        project: Some(project),
+    };
 
     // ── 2. Resolve env vars and collect secret values for masking ───────────
-    let resolved_env = inject::resolve_env(&config, &store, &args.profile)?;
-    let secret_values = inject::collect_secrets(&resolved_env, &config.proxy.routes, &store);
+    let resolved_env = inject::resolve_env(&config, &stores, &args.profile)?;
+    let secret_values = inject::collect_secrets(&resolved_env, &config.proxy.routes, &stores);
     let masker = LogMasker::new(&secret_values)?;
 
     // ── 4. Start proxy (unless --no-proxy) ──────────────────────────────────
     let _proxy_shutdown = if !args.no_proxy && !config.proxy.routes.is_empty() {
-        Some(crate::proxy::start(config.proxy.port, config.proxy.routes, store).await?)
+        Some(crate::proxy::start(config.proxy.port, config.proxy.routes, &stores).await?)
     } else {
         None
     };

@@ -45,4 +45,9 @@ pub struct SetArgs {
 
     /// Secret value — omit to be prompted interactively (no echo)
     pub value: Option<String>,
+
+    /// Store the secret in the project-scoped store instead of the global store.
+    /// Reads the project name from vibeguard.toml in the current directory.
+    #[arg(long)]
+    pub project: bool,
 }

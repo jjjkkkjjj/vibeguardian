@@ -1,25 +1,24 @@
 use std::collections::HashMap;
 
 use anyhow::{Context, Result};
-use serde_json::Value;
 
 use crate::config::{
     project::{ProjectConfig, ProxyRoute},
-    resolver,
+    resolver::{self, SecretStores},
 };
 
 /// Resolve all environment variable values for the given profile.
-/// Values starting with `secret://` are looked up in the secrets store;
+/// Values starting with `secret://` are looked up in the appropriate store;
 /// all other values are returned as-is.
 pub fn resolve_env(
     config: &ProjectConfig,
-    store: &Value,
+    stores: &SecretStores,
     profile: &str,
 ) -> Result<HashMap<String, String>> {
     let profile_env = config.env.get(profile).cloned().unwrap_or_default();
     let mut resolved = HashMap::new();
     for (key, raw_value) in &profile_env {
-        let value = resolver::resolve_value(raw_value, store)
+        let value = resolver::resolve_value(raw_value, stores)
             .with_context(|| format!("Failed to resolve env var '{}'", key))?;
         resolved.insert(key.clone(), value);
     }
@@ -31,12 +30,12 @@ pub fn resolve_env(
 pub fn collect_secrets(
     resolved_env: &HashMap<String, String>,
     routes: &[ProxyRoute],
-    store: &Value,
+    stores: &SecretStores,
 ) -> Vec<String> {
     let mut secrets: Vec<String> = resolved_env.values().cloned().collect();
     for route in routes {
         for raw_header in route.inject_headers.values() {
-            if let Ok(v) = resolver::expand_template(raw_header, store) {
+            if let Ok(v) = resolver::expand_template(raw_header, stores) {
                 secrets.push(v);
             }
         }

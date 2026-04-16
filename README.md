@@ -98,11 +98,15 @@ default_profile = "dev"
 
 # ── Inject Mode ──────────────────────────────────────────────────────────────
 [env.dev]
-DATABASE_URL        = "secret://global/supabase/dev_db_url"   # resolved from ~/.vibeguard/secrets.json
+# secret://global/...  → resolved from ~/.vibeguard/secrets.json        (shared across projects)
+# secret://project/... → resolved from ~/.vibeguard/projects/my-app/secrets.json (this project only)
+DATABASE_URL        = "secret://global/supabase/dev_db_url"
+STRIPE_KEY          = "secret://project/stripe/secret_key"   # project-scoped
 NEXT_PUBLIC_API_URL = "http://localhost:8080/proxy/api"       # plain text is fine for proxy URLs
 
 [env.prod]
 DATABASE_URL = "secret://global/supabase/prod_db_url"
+STRIPE_KEY   = "secret://project/stripe/secret_key"
 
 # ── Proxy Mode ───────────────────────────────────────────────────────────────
 [proxy]
@@ -111,7 +115,7 @@ port = 8080  # default
 [[proxy.routes]]
 path   = "/proxy/stripe"
 target = "https://api.stripe.com"
-inject_headers = { Authorization = "Bearer ${secret://global/stripe/secret_key}" }
+inject_headers = { Authorization = "Bearer ${secret://project/stripe/secret_key}" }
 
 [[proxy.routes]]
 path   = "/proxy/openai"
@@ -140,14 +144,20 @@ Generates a `vibeguard.toml` template in the current directory. Fails if one alr
 
 ### `vg set <PATH> [VALUE]`
 
-Stores a secret in `~/.vibeguard/secrets.json`.
+Stores a secret in the **global** store (`~/.vibeguard/secrets.json`) by default.
+Pass `--project` to store in the **project-scoped** store (`~/.vibeguard/projects/<name>/secrets.json`),
+where `<name>` is read from `vibeguard.toml` in the current directory.
+
+| Flag | Description |
+|---|---|
+| `--project` | Write to the project-scoped store instead of the global store |
 
 - Omit `VALUE` for a hidden interactive prompt
 - Passing `VALUE` as an argument warns about shell history exposure
 
 ```bash
-vg set stripe/secret_key          # interactive
-vg set stripe/secret_key sk_...   # direct (with warning)
+vg set stripe/secret_key          # → ~/.vibeguard/secrets.json
+vg set --project stripe/secret_key sk_...  # → ~/.vibeguard/projects/my-app/secrets.json
 ```
 
 ### `vg status`
@@ -158,9 +168,24 @@ Reads `vibeguard.toml` and displays the list of env var names and proxy routes �
 
 ## Security Design
 
-- `~/.vibeguard/secrets.json` is written with `0o600` permissions (owner read/write only)
+- All secret files are written with `0o600` permissions (owner read/write only)
 - `vibeguard.toml` never contains real secret values
 - Log masking uses Aho-Corasick for O(n) linear-time replacement — no performance impact on high-volume logs
+
+### Secret Scopes
+
+| Scope | URI prefix | Store location | Use case |
+|---|---|---|---|
+| **global** | `secret://global/...` | `~/.vibeguard/secrets.json` | Shared keys (e.g. personal OpenAI key) |
+| **project** | `secret://project/...` | `~/.vibeguard/projects/<name>/secrets.json` | Per-project keys (e.g. Stripe test key for this app only) |
+
+```bash
+# Store globally (shared across all projects)
+vg set global/openai/api_key
+
+# Store for this project only (reads project name from vibeguard.toml)
+vg set --project stripe/secret_key
+```
 
 ---
 

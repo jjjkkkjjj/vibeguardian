@@ -60,6 +60,47 @@ fn insert_value(node: &mut Value, parts: &[&str], secret: &str) -> Result<()> {
     insert_value(child, &parts[1..], secret)
 }
 
+/// Load the project-scoped secrets store for the given project name.
+/// Returns an empty object if the file does not exist.
+pub fn load_project(project_name: &str) -> Result<Value> {
+    let path = project_secrets_path(project_name)?;
+    if !path.exists() {
+        return Ok(Value::Object(Default::default()));
+    }
+    let raw = std::fs::read_to_string(&path)
+        .with_context(|| format!("Failed to read {}", path.display()))?;
+    let val: Value = serde_json::from_str(&raw)
+        .with_context(|| format!("Invalid JSON in {}", path.display()))?;
+    Ok(val)
+}
+
+/// Write a secret at the given slash-separated path into the project-scoped store.
+/// e.g. set_project("my-app", "stripe/secret_key", "sk_live_...")
+pub fn set_project(project_name: &str, path: &str, secret: &str) -> Result<()> {
+    let secrets_file = project_secrets_path(project_name)?;
+    if let Some(parent) = secrets_file.parent() {
+        std::fs::create_dir_all(parent)
+            .with_context(|| format!("Failed to create {}", parent.display()))?;
+    }
+
+    let mut root = load_project(project_name)?;
+    let parts: Vec<&str> = path.split('/').collect();
+    insert_value(&mut root, &parts, secret)?;
+
+    let serialized = serde_json::to_string_pretty(&root)?;
+    write_secret_file(&secrets_file, &serialized)?;
+    Ok(())
+}
+
+fn project_secrets_path(project_name: &str) -> Result<PathBuf> {
+    let home = dirs::home_dir().context("Could not determine home directory")?;
+    Ok(home
+        .join(".vibeguard")
+        .join("projects")
+        .join(project_name)
+        .join("secrets.json"))
+}
+
 /// Resolve a key path (slash-separated) within the loaded secrets store.
 /// e.g. "global/stripe/secret_key" navigates root["global"]["stripe"]["secret_key"]
 pub fn resolve(store: &Value, path: &str) -> Result<String> {

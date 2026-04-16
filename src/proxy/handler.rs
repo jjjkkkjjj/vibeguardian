@@ -11,10 +11,9 @@ use axum::{
     Router,
 };
 use reqwest::Client;
-use serde_json::Value;
 
 use crate::config::project::ProxyRoute;
-use crate::config::resolver;
+use crate::config::resolver::{self, SecretStores};
 
 /// Shared state available to every axum handler.
 #[derive(Clone)]
@@ -32,12 +31,12 @@ struct ResolvedRoute {
 }
 
 /// Resolve all secret references in route headers up-front, at startup.
-pub fn build_router(routes: Vec<ProxyRoute>, store: Value) -> Result<Router> {
+pub fn build_router(routes: Vec<ProxyRoute>, stores: &SecretStores) -> Result<Router> {
     let mut resolved = Vec::with_capacity(routes.len());
     for route in routes {
         let mut headers = HashMap::new();
         for (k, v) in &route.inject_headers {
-            let value = resolver::expand_template(v, &store)?;
+            let value = resolver::expand_template(v, stores)?;
             headers.insert(k.clone(), value);
         }
         resolved.push(ResolvedRoute {
