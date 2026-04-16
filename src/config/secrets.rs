@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 fn secrets_path() -> Result<PathBuf> {
     let home = dirs::home_dir().context("Could not determine home directory")?;
-    Ok(home.join(".vibesafe").join("secrets.json"))
+    Ok(home.join(".vibeguard").join("secrets.json"))
 }
 
 /// Load the entire secrets store as a JSON Value (object at root).

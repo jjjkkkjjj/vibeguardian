@@ -7,7 +7,7 @@ pub fn execute(args: SetArgs) -> Result<()> {
     let value = match args.value {
         Some(v) => {
             eprintln!(
-                "[Vibesafe] Warning: secret value passed as a CLI argument may be visible in shell history."
+                "[Vibeguard] Warning: secret value passed as a CLI argument may be visible in shell history."
             );
             v
         }
@@ -18,6 +18,6 @@ pub fn execute(args: SetArgs) -> Result<()> {
     };
 
     secrets::set(&args.path, &value)?;
-    println!("[Vibesafe] Secret stored at '{}'.", args.path);
+    println!("[Vibeguard] Secret stored at '{}'.", args.path);
     Ok(())
 }

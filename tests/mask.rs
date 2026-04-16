@@ -1,4 +1,4 @@
-use vs::mask::LogMasker;
+use vg::mask::LogMasker;
 
 #[test]
 fn masks_single_secret() {

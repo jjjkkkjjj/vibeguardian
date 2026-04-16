@@ -44,8 +44,8 @@ pub struct ProxyRoute {
 
 impl ProjectConfig {
     pub fn load() -> anyhow::Result<Self> {
-        let raw = std::fs::read_to_string("vibesafe.toml").map_err(|_| {
-            anyhow::anyhow!("vibesafe.toml not found in current directory. Run `vs init` first.")
+        let raw = std::fs::read_to_string("vibeguard.toml").map_err(|_| {
+            anyhow::anyhow!("vibeguard.toml not found in current directory. Run `vg init` first.")
         })?;
         let config: ProjectConfig = toml::from_str(&raw)?;
         Ok(config)

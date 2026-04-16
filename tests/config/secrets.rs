@@ -1,5 +1,5 @@
 use serde_json::json;
-use vs::config::secrets::resolve;
+use vg::config::secrets::resolve;
 
 #[test]
 fn resolve_nested_path() {

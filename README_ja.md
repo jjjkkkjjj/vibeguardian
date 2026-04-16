@@ -1,8 +1,8 @@
-# vibesafer (`vs`)
+# vibeguardian (`vg`)
 
 > VibeCodingで秘匿データをAIから守るCLIツール
 
-`vs run -- npm run dev` のように普段のコマンドをラップするだけで、AIアシスタントがAPIキーに物理的に触れられない開発環境を構築します。
+`vg run -- npm run dev` のように普段のコマンドをラップするだけで、AIアシスタントがAPIキーに物理的に触れられない開発環境を構築します。
 
 English documentation: [README.md](README.md)
 
@@ -12,7 +12,7 @@ English documentation: [README.md](README.md)
 
 | 機能 | 説明 |
 |---|---|
-| **Inject Mode** | `~/.vibesafe/secrets.json` から実際のキーを読み込み、子プロセスのメモリ上にだけ展開。ディスクや `.env` には書き出しません。 |
+| **Inject Mode** | `~/.vibeguard/secrets.json` から実際のキーを読み込み、子プロセスのメモリ上にだけ展開。ディスクや `.env` には書き出しません。 |
 | **Proxy Mode** | ローカルでリバースプロキシ（デフォルト `:8080`）を起動し、AIが生成したコードの `localhost:8080/proxy/stripe` 宛てリクエストに `Authorization` ヘッダを裏で付与して転送。 |
 | **Log Mask Mode** | 子プロセスの stdout/stderr をリアルタイムでフックし、シークレット文字列が含まれていれば `***[MASKED]***` に置換して表示。 |
 
@@ -22,26 +22,26 @@ English documentation: [README.md](README.md)
 
 ### ダウンロード（推奨）
 
-[GitHub Releases](https://github.com/jjjkkkjjj/vibesafer/releases) から最新バイナリをダウンロードして `$PATH` に置いてください。
+[GitHub Releases](https://github.com/jjjkkkjjj/vibeguardian/releases) から最新バイナリをダウンロードして `$PATH` に置いてください。
 
 ```bash
 # macOS (Apple Silicon)
-curl -L https://github.com/jjjkkkjjj/vibesafer/releases/latest/download/vs-vX.X.X-aarch64-apple-darwin.tar.gz | tar xz
+curl -L https://github.com/jjjkkkjjj/vibeguardian/releases/latest/download/vs-vX.X.X-aarch64-apple-darwin.tar.gz | tar xz
 sudo mv vs /usr/local/bin/
 
 # macOS (Intel)
-curl -L https://github.com/jjjkkkjjj/vibesafer/releases/latest/download/vs-vX.X.X-x86_64-apple-darwin.tar.gz | tar xz
+curl -L https://github.com/jjjkkkjjj/vibeguardian/releases/latest/download/vs-vX.X.X-x86_64-apple-darwin.tar.gz | tar xz
 sudo mv vs /usr/local/bin/
 
 # Linux (x86_64)
-curl -L https://github.com/jjjkkkjjj/vibesafer/releases/latest/download/vs-vX.X.X-x86_64-unknown-linux-gnu.tar.gz | tar xz
+curl -L https://github.com/jjjkkkjjj/vibeguardian/releases/latest/download/vs-vX.X.X-x86_64-unknown-linux-gnu.tar.gz | tar xz
 sudo mv vs /usr/local/bin/
 ```
 
 ### cargo でビルド
 
 ```bash
-cargo install --git https://github.com/jjjkkkjjj/vibesafer vs
+cargo install --git https://github.com/jjjkkkjjj/vibeguardian vs
 ```
 
 ---
@@ -49,31 +49,31 @@ cargo install --git https://github.com/jjjkkkjjj/vibesafer vs
 ## クイックスタート
 
 ```bash
-# 1. プロジェクトに vibesafe.toml を生成
-vs init
+# 1. プロジェクトに vibeguard.toml を生成
+vg init
 
 # 2. シークレットをグローバル領域に保存（プロジェクトには絶対保存しない）
-vs set stripe/secret_key              # 入力エコーなし（対話プロンプト）
-vs set openai/api_key sk_...          # 引数渡しも可（シェル履歴に残る旨を警告）
+vg set stripe/secret_key              # 入力エコーなし（対話プロンプト）
+vg set openai/api_key sk_...          # 引数渡しも可（シェル履歴に残る旨を警告）
 
 # 3. 安全な環境でアプリを起動
-vs run -- npm run dev
-vs run --profile prod -- node server.js
+vg run -- npm run dev
+vg run --profile prod -- node server.js
 ```
 
 実行時のターミナル出力例：
 
 ```
-[Vibesafe] Proxy started at http://localhost:8080
-[Vibesafe] Injected 2 env var(s) (profile: dev)
-[Vibesafe] Log masking enabled
+[Vibeguard] Proxy started at http://localhost:8080
+[Vibeguard] Injected 2 env var(s) (profile: dev)
+[Vibeguard] Log masking enabled
 > next dev
 ...
 ```
 
 ---
 
-## `vibesafe.toml` — 設定ファイル
+## `vibeguard.toml` — 設定ファイル
 
 プロジェクトルートに置きます。**実際のAPIキーは一切含まず、Gitにコミットしても安全**です。
 
@@ -83,7 +83,7 @@ name = "my-app"
 default_profile = "dev"
 
 # ── Inject Mode ──────────────────────────────────────────────────────────────
-# secret:// で始まる値は ~/.vibesafe/secrets.json から解決されます
+# secret:// で始まる値は ~/.vibeguard/secrets.json から解決されます
 # それ以外の値はそのまま環境変数として注入されます
 [env.dev]
 DATABASE_URL        = "secret://global/supabase/dev_db_url"
@@ -107,13 +107,13 @@ target = "https://api.openai.com/v1"
 inject_headers = { Authorization = "Bearer ${secret://global/openai/api_key}" }
 ```
 
-AIは `vibesafe.toml` を読んで「リクエスト先は `localhost:8080/proxy/stripe` だな」と理解してコードを書きますが、`secret://` の実際の値には物理的に触れられません。
+AIは `vibeguard.toml` を読んで「リクエスト先は `localhost:8080/proxy/stripe` だな」と理解してコードを書きますが、`secret://` の実際の値には物理的に触れられません。
 
 ---
 
 ## コマンドリファレンス
 
-### `vs run [OPTIONS] -- <CMD>`
+### `vg run [OPTIONS] -- <CMD>`
 
 | フラグ | 説明 |
 |---|---|
@@ -122,32 +122,32 @@ AIは `vibesafe.toml` を読んで「リクエスト先は `localhost:8080/proxy
 | `--no-proxy` | ローカルプロキシを起動しない |
 | `-- <CMD>` | 実行するコマンド（例: `npm run dev`） |
 
-### `vs init`
+### `vg init`
 
-カレントディレクトリに `vibesafe.toml` テンプレートを生成します。既に存在する場合はエラー。
+カレントディレクトリに `vibeguard.toml` テンプレートを生成します。既に存在する場合はエラー。
 
-### `vs set <PATH> [VALUE]`
+### `vg set <PATH> [VALUE]`
 
-`~/.vibesafe/secrets.json` にシークレットを保存します。
+`~/.vibeguard/secrets.json` にシークレットを保存します。
 
 - `VALUE` を省略するとエコーなし入力プロンプトを表示
 - `VALUE` を引数で渡した場合、シェル履歴への露出を警告
 
 ```bash
-vs set stripe/secret_key          # 対話入力（推奨）
-vs set stripe/secret_key sk_...   # 直接指定（警告が表示されます）
+vg set stripe/secret_key          # 対話入力（推奨）
+vg set stripe/secret_key sk_...   # 直接指定（警告が表示されます）
 ```
 
-### `vs status`
+### `vg status`
 
-カレントディレクトリの `vibesafe.toml` を読み取り、注入予定の環境変数名とプロキシルート一覧を**値をマスクして**表示します。
+カレントディレクトリの `vibeguard.toml` を読み取り、注入予定の環境変数名とプロキシルート一覧を**値をマスクして**表示します。
 
 ---
 
 ## セキュリティ設計
 
-- `~/.vibesafe/secrets.json` はファイルパーミッション `0o600`（所有者のみ読み書き可）で書き込まれます
-- `vibesafe.toml` に実値は一切含まれません
+- `~/.vibeguard/secrets.json` はファイルパーミッション `0o600`（所有者のみ読み書き可）で書き込まれます
+- `vibeguard.toml` に実値は一切含まれません
 - ログマスクは Aho-Corasick 法による O(n) の線形時間処理で、大量ログでもパフォーマンスへの影響はありません
 
 ---

@@ -43,12 +43,12 @@ pub async fn execute(args: RunArgs) -> Result<()> {
         .with_context(|| format!("Failed to spawn '{}'", program))?;
 
     println!(
-        "[Vibesafe] Injected {} env var(s) (profile: {})",
+        "[Vibeguard] Injected {} env var(s) (profile: {})",
         resolved_env.len(),
         args.profile
     );
     if !args.no_mask {
-        println!("[Vibesafe] Log masking enabled");
+        println!("[Vibeguard] Log masking enabled");
     }
 
     // ── 6. Stream stdout / stderr through the masker ─────────────────────────

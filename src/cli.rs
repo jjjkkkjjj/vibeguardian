@@ -1,7 +1,7 @@
 use clap::{Args, Parser, Subcommand};
 
 #[derive(Parser)]
-#[command(name = "vs", about = "Protect API secrets during VibeCoding")]
+#[command(name = "vg", about = "Protect API secrets during VibeCoding")]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Commands,
@@ -9,11 +9,11 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Run a command under Vibesafe (inject env vars, start proxy, mask logs)
+    /// Run a command under Vibeguard (inject env vars, start proxy, mask logs)
     Run(RunArgs),
-    /// Generate a vibesafe.toml template in the current directory
+    /// Generate a vibeguard.toml template in the current directory
     Init,
-    /// Store a secret in ~/.vibesafe/secrets.json
+    /// Store a secret in ~/.vibeguard/secrets.json
     Set(SetArgs),
     /// Show proxy status and injected key names for the current project
     Status,

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-vibesafer (`vs`) is a Rust CLI tool that protects API secrets during development by isolating them from AI assistants and processes. It wraps development workflows via three mechanisms: env-var injection, local reverse proxy with header injection, and real-time log masking.
+vibeguardian (`vg`) is a Rust CLI tool that protects API secrets during development by isolating them from AI assistants and processes. It wraps development workflows via three mechanisms: env-var injection, local reverse proxy with header injection, and real-time log masking.
 
 ## Before writing any code
 
@@ -13,7 +13,7 @@ Read `docs/design.md` and `docs/cli.md` first. These are the authoritative spec.
 ## Stack
 
 - **Language:** Rust
-- **CLI parsing:** `clap` (subcommands + `TrailingVarArg` for `vs run -- <cmd>`)
+- **CLI parsing:** `clap` (subcommands + `TrailingVarArg` for `vg run -- <cmd>`)
 - **Async runtime:** `tokio`
 - **HTTP proxy:** `axum` or `hyper` + `reqwest`
 - **Log masking:** `aho-corasick` (O(n) multi-string matching)
@@ -30,5 +30,5 @@ rustfmt src/**/*.rs  # format
 
 ## Configuration
 
-- `vibesafe.toml` — project-level config (safe for Git; uses `secret://` references, never actual values)
-- `~/.vibesafe/secrets.json` — global secret store (never committed, never in project dir)
+- `vibeguard.toml` — project-level config (safe for Git; uses `secret://` references, never actual values)
+- `~/.vibeguard/secrets.json` — global secret store (never committed, never in project dir)

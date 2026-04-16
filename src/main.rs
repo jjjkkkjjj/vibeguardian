@@ -1,7 +1,7 @@
 use anyhow::Result;
 use clap::Parser;
-use vs::cli::{Cli, Commands};
-use vs::commands;
+use vg::cli::{Cli, Commands};
+use vg::commands;
 
 #[tokio::main]
 async fn main() -> Result<()> {

@@ -48,18 +48,18 @@ jobs:
         if: matrix.archive == 'tar.gz'
         shell: bash
         run: |
-          BIN=vs
+          BIN=vg
           VER="${{ github.ref_name }}"
           TGT="${{ matrix.target }}"
 
           cp "target/${TGT}/release/${BIN}" .
 
-          # versioned filename  (e.g. vs-v0.2.0-aarch64-apple-darwin.tar.gz)
-          TARBALL_VER="vs-${VER}-${TGT}.tar.gz"
+          # versioned filename  (e.g. vg-v0.2.0-aarch64-apple-darwin.tar.gz)
+          TARBALL_VER="vg-${VER}-${TGT}.tar.gz"
           tar czf "$TARBALL_VER" "$BIN"
 
-          # version-free filename  (e.g. vs-aarch64-apple-darwin.tar.gz)
-          TARBALL_LATEST="vs-${TGT}.tar.gz"
+          # version-free filename  (e.g. vg-aarch64-apple-darwin.tar.gz)
+          TARBALL_LATEST="vg-${TGT}.tar.gz"
           cp "$TARBALL_VER" "$TARBALL_LATEST"
 
           echo "ASSET_VER=$TARBALL_VER"       >> "$GITHUB_ENV"
@@ -70,16 +70,16 @@ jobs:
         shell: bash
         run: |
           cargo deb --target ${{ matrix.target }} --no-build
-          DEB_SRC=$(ls target/${{ matrix.target }}/debian/vs_*.deb | head -1)
-          cp "$DEB_SRC" vs-x86_64-linux.deb
-          echo "ASSET_DEB=vs-x86_64-linux.deb" >> "$GITHUB_ENV"
+          DEB_SRC=$(ls target/${{ matrix.target }}/debian/vg_*.deb | head -1)
+          cp "$DEB_SRC" vg-x86_64-linux.deb
+          echo "ASSET_DEB=vg-x86_64-linux.deb" >> "$GITHUB_ENV"
 
       - name: Package (Windows)
         if: matrix.archive == 'zip'
         shell: pwsh
         run: |
-          $BIN = "vs.exe"
-          $ZIP = "vs-${{ github.ref_name }}-${{ matrix.target }}.zip"
+          $BIN = "vg.exe"
+          $ZIP = "vg-${{ github.ref_name }}-${{ matrix.target }}.zip"
           Copy-Item "target/${{ matrix.target }}/release/$BIN" .
           Compress-Archive -Path $BIN -DestinationPath $ZIP
           "ASSET=$ZIP" | Out-File -FilePath $env:GITHUB_ENV -Append
@@ -111,10 +111,10 @@ jobs:
     needs: [build]
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger homebrew-vibesafer update
+      - name: Trigger homebrew-vibeguardian update
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
-          repository: jjjkkkjjj/homebrew-vibesafer
+          repository: jjjkkkjjj/homebrew-vibeguardian
           event-type: release
           client-payload: '{"version": "${{ github.ref_name }}"}'

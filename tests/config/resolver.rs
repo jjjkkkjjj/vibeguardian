@@ -1,5 +1,5 @@
 use serde_json::json;
-use vs::config::resolver::{expand_template, resolve_value};
+use vg::config::resolver::{expand_template, resolve_value};
 
 fn store() -> serde_json::Value {
     json!({ "global": { "stripe": { "secret_key": "sk_live_abc" } } })

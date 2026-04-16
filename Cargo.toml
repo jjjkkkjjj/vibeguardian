@@ -1,19 +1,19 @@
 [package]
-name = "vs"
+name = "vg"
 version = "0.1.1"
 edition = "2021"
 description = "Protect API secrets during VibeCoding — env injection, local proxy, log masking"
 license = "MIT"
-repository = "https://github.com/jjjkkkjjj/vibesafer"
+repository = "https://github.com/jjjkkkjjj/vibeguardian"
 keywords = ["secrets", "proxy", "devtools", "security"]
 categories = ["command-line-utilities", "development-tools"]
 
 [[bin]]
-name = "vs"
+name = "vg"
 path = "src/main.rs"
 
 [lib]
-name = "vs"
+name = "vg"
 path = "src/lib.rs"
 
 # ── Distribution (cargo-dist) ──────────────────────────────────────────────

@@ -5,7 +5,7 @@ name = "my-app"
 default_profile = "dev"
 
 # ── Inject Mode: environment variables ──────────────────────────────────────
-# Values starting with secret:// are resolved from ~/.vibesafe/secrets.json
+# Values starting with secret:// are resolved from ~/.vibeguard/secrets.json
 # All other values are injected as-is (safe for non-sensitive config).
 [env.dev]
 DATABASE_URL = "secret://global/supabase/dev_db_url"
@@ -30,12 +30,12 @@ inject_headers = { Authorization = "Bearer ${secret://global/openai/api_key}" }
 "#;
 
 pub fn execute() -> Result<()> {
-    let path = std::path::Path::new("vibesafe.toml");
+    let path = std::path::Path::new("vibeguard.toml");
     if path.exists() {
-        bail!("vibesafe.toml already exists in the current directory.");
+        bail!("vibeguard.toml already exists in the current directory.");
     }
     std::fs::write(path, TEMPLATE)?;
-    println!("[Vibesafe] Created vibesafe.toml — safe to commit to Git.");
-    println!("           Store actual secrets with: vs set <path> [value]");
+    println!("[Vibeguard] Created vibeguard.toml — safe to commit to Git.");
+    println!("            Store actual secrets with: vg set <path> [value]");
     Ok(())
 }
